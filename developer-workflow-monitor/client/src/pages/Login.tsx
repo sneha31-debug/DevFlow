@@ -3,35 +3,79 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, ArrowRight, Github } from 'lucide-react';
 
+const API_URL = 'http://localhost:5001';
+
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
-        // Check for token in URL (redirected from backend)
+        // Check for token in URL (redirected from GitHub OAuth)
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
 
         if (token) {
             localStorage.setItem('token', token);
-            // Clear the token from URL for cleaner history
+            // Fetch user profile and store it
+            fetchUserProfile(token);
+        }
+    }, [location]);
+
+    const fetchUserProfile = async (token: string) => {
+        try {
+            const res = await fetch(`${API_URL}/api/auth/me`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
+            navigate('/', { replace: true });
+        } catch (err) {
             navigate('/', { replace: true });
         }
-    }, [location, navigate]);
+    };
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Connect to backend email/pass login. 
-        // For now, simulator success or use GitHub.
-        localStorage.setItem('token', 'fake-jwt-token');
-        navigate('/');
+        setError('');
+
+        if (!email || !password) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Login failed');
+            }
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            navigate('/');
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleGithubLogin = () => {
-        // Redirect to backend GitHub auth route
-        window.location.href = 'http://localhost:5000/api/auth/github';
+        window.location.href = `${API_URL}/api/auth/github`;
     };
 
     return (
@@ -53,6 +97,12 @@ const Login = () => {
                     </h1>
                     <p className="text-text-muted">Sign in to monitor your APIs</p>
                 </div>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                        {error}
+                    </div>
+                )}
 
                 <div className="mb-6">
                     <button
@@ -84,7 +134,6 @@ const Login = () => {
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                            // required 
                             />
                         </div>
                     </div>
@@ -99,13 +148,16 @@ const Login = () => {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                            // required
                             />
                         </div>
                     </div>
 
-                    <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2 group">
-                        Sign In
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-primary w-full flex items-center justify-center gap-2 group disabled:opacity-50"
+                    >
+                        {loading ? 'Signing in...' : 'Sign In'}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </form>
