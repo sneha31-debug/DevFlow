@@ -4,6 +4,7 @@ import session from 'express-session';
 import passport from './config/passport';
 import authRoutes from './routes/auth.routes';
 import githubRoutes from './routes/github.routes';
+import projectRoutes from './routes/project.routes';
 import { connectDB } from './config/db';
 
 const app = express();
@@ -37,6 +38,7 @@ app.use(passport.session());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

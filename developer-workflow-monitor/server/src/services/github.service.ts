@@ -59,7 +59,7 @@ export async function syncUserRepositories(userId: string): Promise<number> {
     const user = await User.findById(userId).select('+githubAccessToken');
 
     if (!user || !user.githubAccessToken) {
-        throw new Error('User not found or no GitHub token available');
+        throw new Error('No GitHub token available. Please logout and login with GitHub again to authorize repository access.');
     }
 
     const github = new GitHubService(user.githubAccessToken);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Github, RefreshCw, Star, GitFork, Lock, Globe, ArrowLeft } from 'lucide-react';
+import { Github, RefreshCw, Star, GitFork, Lock, Globe, ArrowLeft, Plus, Check } from 'lucide-react';
 
 const API_URL = 'http://localhost:5001';
 
@@ -22,7 +22,10 @@ const Repositories = () => {
     const [repos, setRepos] = useState<Repository[]>([]);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
+    const [addingProject, setAddingProject] = useState<string | null>(null);
+    const [addedProjects, setAddedProjects] = useState<Set<string>>(new Set());
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const fetchRepos = async () => {
         try {
@@ -38,6 +41,22 @@ const Repositories = () => {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchExistingProjects = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/api/projects`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.projects) {
+                const projectRepoIds = new Set(data.projects.map((p: any) => p.repository._id));
+                setAddedProjects(projectRepoIds as Set<string>);
+            }
+        } catch (err) {
+            console.error('Error fetching projects:', err);
         }
     };
 
@@ -61,8 +80,42 @@ const Repositories = () => {
         }
     };
 
+    const addToProject = async (repo: Repository) => {
+        setAddingProject(repo._id);
+        setError('');
+        setSuccess('');
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/api/projects`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    repositoryId: repo._id,
+                    name: repo.name,
+                    description: repo.description,
+                }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setAddedProjects(prev => new Set([...prev, repo._id]));
+                setSuccess(`Project "${repo.name}" created successfully!`);
+                setTimeout(() => setSuccess(''), 3000);
+            } else {
+                setError(data.message);
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setAddingProject(null);
+        }
+    };
+
     useEffect(() => {
         fetchRepos();
+        fetchExistingProjects();
     }, []);
 
     const getLanguageColor = (lang: string) => {
@@ -96,23 +149,34 @@ const Repositories = () => {
                                 My Repositories
                             </h1>
                             <p className="text-text-muted mt-1">
-                                {repos.length} repositories synced
+                                {repos.length} repositories synced • Click "Add to Project" to track
                             </p>
                         </div>
                     </div>
-                    <button
-                        onClick={syncRepos}
-                        disabled={syncing}
-                        className="btn-primary flex items-center gap-2"
-                    >
-                        <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
-                        {syncing ? 'Syncing...' : 'Sync from GitHub'}
-                    </button>
+                    <div className="flex gap-3">
+                        <Link to="/projects" className="btn-secondary flex items-center gap-2">
+                            View Projects
+                        </Link>
+                        <button
+                            onClick={syncRepos}
+                            disabled={syncing}
+                            className="btn-primary flex items-center gap-2"
+                        >
+                            <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+                            {syncing ? 'Syncing...' : 'Sync from GitHub'}
+                        </button>
+                    </div>
                 </div>
 
                 {error && (
                     <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
                         {error}
+                    </div>
+                )}
+
+                {success && (
+                    <div className="mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400">
+                        {success}
                     </div>
                 )}
 
@@ -131,25 +195,42 @@ const Repositories = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {repos.map((repo) => (
-                            <motion.a
+                            <motion.div
                                 key={repo._id}
-                                href={repo.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
                                 whileHover={{ y: -2 }}
-                                className="glass-panel p-5 rounded-xl hover:border-primary/50 transition-colors block"
+                                className="glass-panel p-5 rounded-xl"
                             >
                                 <div className="flex items-start justify-between mb-2">
-                                    <div className="flex items-center gap-2">
+                                    <a
+                                        href={repo.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 hover:text-primary"
+                                    >
                                         {repo.isPrivate ? (
                                             <Lock className="w-4 h-4 text-yellow-500" />
                                         ) : (
                                             <Globe className="w-4 h-4 text-green-500" />
                                         )}
-                                        <h3 className="font-semibold text-lg hover:text-primary">
+                                        <h3 className="font-semibold text-lg">
                                             {repo.name}
                                         </h3>
-                                    </div>
+                                    </a>
+                                    {addedProjects.has(repo._id) ? (
+                                        <span className="flex items-center gap-1 text-sm text-green-400">
+                                            <Check className="w-4 h-4" />
+                                            In Projects
+                                        </span>
+                                    ) : (
+                                        <button
+                                            onClick={() => addToProject(repo)}
+                                            disabled={addingProject === repo._id}
+                                            className="flex items-center gap-1 text-sm px-3 py-1 bg-primary/20 hover:bg-primary/40 text-primary rounded-lg transition-colors"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            {addingProject === repo._id ? 'Adding...' : 'Add to Project'}
+                                        </button>
+                                    )}
                                 </div>
 
                                 {repo.description && (
@@ -177,7 +258,7 @@ const Repositories = () => {
                                         {repo.forks}
                                     </div>
                                 </div>
-                            </motion.a>
+                            </motion.div>
                         ))}
                     </div>
                 )}

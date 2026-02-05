@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProjectList from './features/projects/ProjectList';
 import ProjectForm from './features/projects/ProjectForm';
+import ProjectDetail from './pages/ProjectDetail';
 import Repositories from './pages/Repositories';
 import ActivityLogs from './pages/ActivityLogs';
 
@@ -36,6 +37,12 @@ function App() {
         <Route path="/projects/new" element={
           <PrivateRoute>
             <ProjectForm />
+          </PrivateRoute>
+        } />
+
+        <Route path="/projects/:id" element={
+          <PrivateRoute>
+            <ProjectDetail />
           </PrivateRoute>
         } />
 

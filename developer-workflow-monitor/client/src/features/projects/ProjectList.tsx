@@ -1,53 +1,205 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Github } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { FolderGit2, ArrowLeft, Trash2, ExternalLink, Clock, Activity } from 'lucide-react';
+
+const API_URL = 'http://localhost:5001';
+
+interface Repository {
+    _id: string;
+    name: string;
+    fullName: string;
+    url: string;
+    language?: string;
+    stars: number;
+    forks: number;
+    isPrivate: boolean;
+}
+
+interface Project {
+    _id: string;
+    name: string;
+    description?: string;
+    repository: Repository;
+    status: 'active' | 'paused' | 'completed';
+    lastActivityAt: string;
+    createdAt: string;
+}
 
 const ProjectList = () => {
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const fetchProjects = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/api/projects`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (data.projects) {
+                setProjects(data.projects);
+            }
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteProject = async (projectId: string) => {
+        if (!confirm('Are you sure you want to delete this project?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_URL}/api/projects/${projectId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                setProjects(prev => prev.filter(p => p._id !== projectId));
+            }
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const getStatusColor = (status: string) => {
+        const colors: Record<string, string> = {
+            active: 'bg-green-500/20 text-green-400 border-green-500/30',
+            paused: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+            completed: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        };
+        return colors[status] || colors.active;
+    };
+
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
     return (
-        <div className="min-h-screen pl-64">
-            {/* Re-use Sidebar logic or make a Layout component later for cleanliness, but copying for specific file isolation is fine for initial setup */}
-            <div className="w-64 glass-panel border-r border-[#ffffff10] h-screen flex flex-col fixed left-0 top-0 z-20">
-                <div className="p-6 border-b border-[#ffffff10]">
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                        DevMonitor
-                    </h1>
-                </div>
-                {/* Simplified nav for stub */}
-                <nav className="flex-1 p-4 space-y-2">
-                    <Link to="/" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">Back to Dashboard</Link>
-                </nav>
-            </div>
+        <div className="min-h-screen p-8 relative">
+            {/* Background */}
+            <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-black -z-10" />
 
-            <main className="p-8">
-                <header className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold mb-1">Projects</h1>
-                        <p className="text-text-muted">Manage your monitored services</p>
+            <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-4">
+                        <Link to="/" className="text-text-muted hover:text-white transition-colors">
+                            <ArrowLeft className="w-6 h-6" />
+                        </Link>
+                        <div>
+                            <h1 className="text-3xl font-bold flex items-center gap-3">
+                                <FolderGit2 className="w-8 h-8" />
+                                My Projects
+                            </h1>
+                            <p className="text-text-muted mt-1">
+                                {projects.length} project{projects.length !== 1 ? 's' : ''} tracked
+                            </p>
+                        </div>
                     </div>
-                    <Link to="/projects/new" className="btn-primary flex items-center gap-2">
-                        <Plus className="w-5 h-5" />
-                        New Project
+                    <Link to="/repositories" className="btn-primary flex items-center gap-2">
+                        Add from Repositories
                     </Link>
-                </header>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Fake Project Cards */}
-                    {[1, 2, 3].map((i) => (
-                        <motion.div key={i} whileHover={{ y: -5 }} className="glass-panel p-6 rounded-xl relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition-opacity">
-                                <Github className="w-6 h-6" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">Service-Core-API-{i}</h3>
-                            <p className="text-text-muted text-sm mb-4">Node.js • Express • MongoDB</p>
-
-                            <div className="flex items-center gap-4 text-sm">
-                                <div className="px-2 py-1 bg-success/10 text-success rounded">99.9% Uptime</div>
-                                <div className="text-text-muted">Last check: 2m ago</div>
-                            </div>
-                        </motion.div>
-                    ))}
                 </div>
-            </main>
+
+                {error && (
+                    <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
+                        {error}
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="text-center py-12 text-text-muted">
+                        Loading projects...
+                    </div>
+                ) : projects.length === 0 ? (
+                    <div className="text-center py-12">
+                        <FolderGit2 className="w-16 h-16 mx-auto text-text-muted mb-4" />
+                        <h3 className="text-xl font-medium mb-2">No projects yet</h3>
+                        <p className="text-text-muted mb-4">
+                            Add a repository to start tracking your projects
+                        </p>
+                        <Link to="/repositories" className="btn-primary">
+                            Browse Repositories
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {projects.map((project) => (
+                            <motion.div
+                                key={project._id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="glass-panel p-6 rounded-xl"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <Link
+                                                to={`/projects/${project._id}`}
+                                                className="text-xl font-semibold hover:text-primary transition-colors"
+                                            >
+                                                {project.name}
+                                            </Link>
+                                            <span className={`px-2 py-1 text-xs rounded-full border ${getStatusColor(project.status)}`}>
+                                                {project.status}
+                                            </span>
+                                        </div>
+
+                                        {project.description && (
+                                            <p className="text-text-muted mb-3">{project.description}</p>
+                                        )}
+
+                                        <div className="flex items-center gap-6 text-sm text-text-muted">
+                                            <a
+                                                href={project.repository.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-1 hover:text-primary"
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                                {project.repository.fullName}
+                                            </a>
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="w-4 h-4" />
+                                                Created {formatDate(project.createdAt)}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <Activity className="w-4 h-4" />
+                                                Last activity {formatDate(project.lastActivityAt)}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            to={`/projects/${project._id}`}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                            title="View Details"
+                                        >
+                                            <Activity className="w-5 h-5 text-text-muted hover:text-white" />
+                                        </Link>
+                                        <button
+                                            onClick={() => deleteProject(project._id)}
+                                            className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                                            title="Delete Project"
+                                        >
+                                            <Trash2 className="w-5 h-5 text-text-muted hover:text-red-400" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
