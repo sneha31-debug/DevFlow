@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, CallbackWithoutResultAndOptionalError } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
@@ -25,13 +25,19 @@ const UserSchema: Schema = new Schema({
 });
 
 // Hash password before saving
-UserSchema.pre<IUser>('save', async function (next) {
+UserSchema.pre('save', async function (next: CallbackWithoutResultAndOptionalError) {
+    // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password') || !this.password) {
         return next();
     }
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password as string, salt);
+        next();
+    } catch (error: any) {
+        next(error);
+    }
 });
 
 // Compare password method
