@@ -25,8 +25,12 @@ passport.use(
                 // Check if user already exists
                 let user = await User.findOne({ githubId: profile.id });
 
-                if (!user) {
-                    // Create new user
+                if (user) {
+                    // Update access token for existing user
+                    user.githubAccessToken = accessToken;
+                    await user.save();
+                } else {
+                    // Create new user with access token
                     user = await User.create({
                         githubId: profile.id,
                         username: profile.username,
@@ -34,6 +38,7 @@ passport.use(
                         avatarUrl: profile.photos?.[0]?.value,
                         displayName: profile.displayName,
                         authProvider: 'github',
+                        githubAccessToken: accessToken,
                     });
                 }
 

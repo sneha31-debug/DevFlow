@@ -5,7 +5,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProjectList from './features/projects/ProjectList';
 import ProjectForm from './features/projects/ProjectForm';
-// import ApiTester from './pages/ApiTester'; // Placeholder
+import Repositories from './pages/Repositories';
+import ActivityLogs from './pages/ActivityLogs';
 
 // Simple Auth Layout Stub
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -35,6 +36,18 @@ function App() {
         <Route path="/projects/new" element={
           <PrivateRoute>
             <ProjectForm />
+          </PrivateRoute>
+        } />
+
+        <Route path="/repositories" element={
+          <PrivateRoute>
+            <Repositories />
+          </PrivateRoute>
+        } />
+
+        <Route path="/logs" element={
+          <PrivateRoute>
+            <ActivityLogs />
           </PrivateRoute>
         } />
 

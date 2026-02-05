@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, CallbackWithoutResultAndOptionalError } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
@@ -9,11 +9,12 @@ export interface IUser extends Document {
     avatarUrl?: string;
     displayName?: string;
     authProvider: 'github' | 'local';
+    githubAccessToken?: string; // For GitHub API access
     createdAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema: Schema = new Schema({
+const UserSchema = new Schema<IUser>({
     githubId: { type: String, unique: true, sparse: true },
     username: { type: String, required: true },
     email: { type: String, unique: true, sparse: true },
@@ -21,23 +22,19 @@ const UserSchema: Schema = new Schema({
     avatarUrl: { type: String },
     displayName: { type: String },
     authProvider: { type: String, enum: ['github', 'local'], default: 'local' },
+    githubAccessToken: { type: String, select: false }, // Store GitHub OAuth token
     createdAt: { type: Date, default: Date.now },
 });
 
 // Hash password before saving
-UserSchema.pre('save', async function (next: CallbackWithoutResultAndOptionalError) {
+UserSchema.pre('save', async function () {
     // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password') || !this.password) {
-        return next();
+        return;
     }
 
-    try {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password as string, salt);
-        next();
-    } catch (error: any) {
-        next(error);
-    }
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Compare password method
