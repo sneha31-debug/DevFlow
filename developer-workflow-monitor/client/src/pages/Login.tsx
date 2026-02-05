@@ -1,18 +1,37 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, Mail, ArrowRight } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Github } from 'lucide-react';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        // Check for token in URL (redirected from backend)
+        const params = new URLSearchParams(location.search);
+        const token = params.get('token');
+
+        if (token) {
+            localStorage.setItem('token', token);
+            // Clear the token from URL for cleaner history
+            navigate('/', { replace: true });
+        }
+    }, [location, navigate]);
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Connect to backend. For now, simulate success.
+        // TODO: Connect to backend email/pass login. 
+        // For now, simulator success or use GitHub.
         localStorage.setItem('token', 'fake-jwt-token');
         navigate('/');
+    };
+
+    const handleGithubLogin = () => {
+        // Redirect to backend GitHub auth route
+        window.location.href = 'http://localhost:5000/api/auth/github';
     };
 
     return (
@@ -35,6 +54,25 @@ const Login = () => {
                     <p className="text-text-muted">Sign in to monitor your APIs</p>
                 </div>
 
+                <div className="mb-6">
+                    <button
+                        onClick={handleGithubLogin}
+                        className="w-full flex items-center justify-center gap-2 bg-[#24292F] hover:bg-[#24292F]/90 text-white p-3 rounded-lg transition-colors border border-gray-700 font-medium"
+                    >
+                        <Github className="w-5 h-5" />
+                        Sign in with GitHub
+                    </button>
+
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-700"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-[#1e293b] text-text-muted">Or continue with email</span>
+                        </div>
+                    </div>
+                </div>
+
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-text-muted mb-2">Email Address</label>
@@ -46,7 +84,7 @@ const Login = () => {
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                required
+                            // required 
                             />
                         </div>
                     </div>
@@ -61,7 +99,7 @@ const Login = () => {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                required
+                            // required
                             />
                         </div>
                     </div>
