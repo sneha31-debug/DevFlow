@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, ArrowLeft, RefreshCw, Filter, Github, Clock } from 'lucide-react';
+import { FileText, ArrowLeft, RefreshCw, Filter, Github } from 'lucide-react';
 
 const API_URL = 'http://localhost:5001';
 

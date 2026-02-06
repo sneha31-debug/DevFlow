@@ -82,7 +82,7 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
         }
 
         // Fetch and sync latest logs from GitHub
-        const logs = await fetchProjectLogs(id, user._id.toString());
+        const logs = await fetchProjectLogs(id as string, user._id.toString());
 
         res.json({ project, logs });
     } catch (error: any) {
