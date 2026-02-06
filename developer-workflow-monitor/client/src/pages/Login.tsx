@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, ArrowRight, Github } from 'lucide-react';
+import AuthBackground from '../components/AuthBackground';
+import { AuthStyles } from '../styles/AuthStyles';
 
 const API_URL = 'http://localhost:5001';
 
@@ -14,10 +16,8 @@ const Login = () => {
     const location = useLocation();
 
     useEffect(() => {
-        // Check for token in URL (redirected from GitHub OAuth)
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
-
         if (token) {
             localStorage.setItem('token', token);
             fetchUserProfile(token);
@@ -78,97 +78,103 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0F1117]">
-            {/* Background Ambience */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[128px] animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[128px] animate-pulse delay-1000" />
+        <div className={AuthStyles.page}>
+            <AuthBackground />
 
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, scale: 0.96, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
                 className="relative z-10 w-full max-w-md mx-4"
             >
-                <div className="glass-card p-8 shadow-2xl shadow-black/50">
-                    <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">
-                            Welcome Back
-                        </h1>
-                        <p className="text-slate-400">Sign in to monitor your APIs</p>
-                    </div>
-
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                            {error}
-                        </div>
-                    )}
-
-                    <div className="space-y-6">
-                        <button
-                            onClick={handleGithubLogin}
-                            className="w-full flex items-center justify-center gap-3 bg-[#24292F] hover:bg-[#24292F]/80 text-white p-3.5 rounded-xl transition-all border border-white/10 font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-                        >
-                            <Github className="w-5 h-5" />
-                            Sign in with GitHub
-                        </button>
-
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-white/10"></div>
+                <div className={AuthStyles.cardWrapper}>
+                    <div className={AuthStyles.cardGlow} />
+                    <div className={AuthStyles.card}>
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <div className={AuthStyles.iconBadge}>
+                                <Lock className="w-7 h-7 text-white" />
                             </div>
-                            <div className="relative flex justify-center text-xs uppercase tracking-wider">
-                                <span className="px-4 bg-[#14161B] text-slate-500">Or continue with email</span>
-                            </div>
+                            <h1 className={AuthStyles.title}>Welcome Back</h1>
+                            <p className={AuthStyles.subtitle}>Sign in to your workflow dashboard</p>
                         </div>
 
-                        <form onSubmit={handleLogin} className="space-y-5">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-                                <div className="relative group">
-                                    <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
-                                    <input
-                                        type="email"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-11 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-medium"
-                                        placeholder="you@example.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-                                <div className="relative group">
-                                    <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
-                                    <input
-                                        type="password"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-11 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-medium"
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 hover:-translate-y-0.5 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                        {/* Error */}
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={AuthStyles.error}
                             >
-                                {loading ? 'Signing in...' : 'Sign In'}
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </form>
-                    </div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse flex-shrink-0" />
+                                {error}
+                            </motion.div>
+                        )}
 
-                    <p className="mt-8 text-center text-slate-400 text-sm">
-                        Don't have an account?{' '}
-                        <Link to="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
-                            Create account
-                        </Link>
-                    </p>
+                        <div className="space-y-8">
+                            {/* GitHub */}
+                            <button onClick={handleGithubLogin} className={`group ${AuthStyles.githubBtn}`}>
+                                <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                Continue with GitHub
+                            </button>
+
+                            {/* Divider */}
+                            <div className={AuthStyles.divider}>
+                                <div className={AuthStyles.dividerLine} />
+                                <div className="flex justify-center">
+                                    <span className={AuthStyles.dividerText}>OR CONTINUE WITH</span>
+                                </div>
+                            </div>
+
+                            {/* Form */}
+                            <form onSubmit={handleLogin} className="space-y-5">
+                                <div>
+                                    <label className={AuthStyles.label}>EMAIL ADDRESS</label>
+                                    <div className={AuthStyles.inputWrapper}>
+                                        <Mail className={AuthStyles.inputIcon} />
+                                        <input
+                                            type="email"
+                                            className={AuthStyles.input}
+                                            placeholder="you@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className={AuthStyles.label}>PASSWORD</label>
+                                    <div className={AuthStyles.inputWrapper}>
+                                        <Lock className={AuthStyles.inputIcon} />
+                                        <input
+                                            type="password"
+                                            className={AuthStyles.input}
+                                            placeholder="••••••••"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className={`group mt-2 ${AuthStyles.submitBtn}`}
+                                >
+                                    {loading ? 'Signing in...' : 'Sign In'}
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Footer */}
+                        <p className={AuthStyles.footerText}>
+                            Don't have an account?{' '}
+                            <Link to="/register" className={AuthStyles.footerLink}>
+                                Create account
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </motion.div>
         </div>
