@@ -91,7 +91,7 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
 router.post('/:id/run', authMiddleware, async (req: Request, res: Response) => {
     try {
         const user = req.user as IUser;
-        const result = await ApiTestService.runTest(req.params.id, user._id.toString());
+        const result = await ApiTestService.runTest(req.params.id as string, user._id.toString());
         res.json({ result });
     } catch (error: any) {
         res.status(500).json({ message: 'Error running test', error: error.message });
