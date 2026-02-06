@@ -53,6 +53,9 @@ const ActivityLogs = () => {
             LOGIN: 'bg-green-500/20 text-green-400 border-green-500/30',
             LOGOUT: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
             API_CALL: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+            COMMIT: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+            PROJECT_CREATED: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+            STAR: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
         };
         return colors[action] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
@@ -93,7 +96,7 @@ const ActivityLogs = () => {
                         onClick={fetchLogs}
                         className="btn-secondary flex items-center gap-2"
                     >
-                        <RefreshCw className="w-5 h-5" />
+                        <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                         Refresh
                     </button>
                 </div>
@@ -108,8 +111,9 @@ const ActivityLogs = () => {
                     >
                         <option value="" className="bg-slate-800">All Actions</option>
                         <option value="REPO_SYNC" className="bg-slate-800">Repository Sync</option>
+                        <option value="COMMIT" className="bg-slate-800">Commits</option>
+                        <option value="PROJECT_CREATED" className="bg-slate-800">Projects</option>
                         <option value="LOGIN" className="bg-slate-800">Login</option>
-                        <option value="API_CALL" className="bg-slate-800">API Calls</option>
                     </select>
                 </div>
 
@@ -138,25 +142,43 @@ const ActivityLogs = () => {
                                 key={log._id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="glass-panel p-4 rounded-xl"
+                                className="glass-panel p-4 rounded-xl hover:border-white/10 transition-colors"
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-3 mb-2">
-                                            <span className={`px-2 py-1 text-xs rounded-full border ${getActionColor(log.action)}`}>
+                                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${getActionColor(log.action)}`}>
                                                 {log.action}
                                             </span>
                                             {log.repository && (
-                                                <div className="flex items-center gap-1 text-sm text-text-muted">
-                                                    <Github className="w-4 h-4" />
+                                                <div className="flex items-center gap-1 text-xs text-text-muted">
+                                                    <Github className="w-3 h-3" />
                                                     {log.repository.name}
                                                 </div>
                                             )}
+                                            {log.metadata?.author && (
+                                                <span className="text-[10px] text-text-muted">
+                                                    by {log.metadata.author}
+                                                </span>
+                                            )}
                                         </div>
-                                        <p className="text-white">{log.message}</p>
+                                        <p className="text-white text-sm leading-relaxed">
+                                            {log.message}
+                                        </p>
+                                        {log.metadata?.url && (
+                                            <div className="mt-2">
+                                                <a
+                                                    href={log.metadata.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-[10px] text-primary hover:underline"
+                                                >
+                                                    View Details on GitHub →
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="flex items-center gap-1 text-sm text-text-muted">
-                                        <Clock className="w-4 h-4" />
+                                    <div className="text-xs text-text-muted whitespace-nowrap pt-1">
                                         {formatTime(log.timestamp)}
                                     </div>
                                 </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Clock, Activity, FileText, Github } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Clock, Activity, FileText, Github, User } from 'lucide-react';
 
 const API_URL = 'http://localhost:5001';
 
@@ -29,6 +29,13 @@ interface ActivityLog {
     _id: string;
     action: string;
     message: string;
+    metadata?: {
+        sha?: string;
+        author?: string;
+        url?: string;
+        eventId?: string;
+        type?: string;
+    };
     timestamp: string;
 }
 
@@ -113,6 +120,15 @@ const ProjectDetail = () => {
                             <p className="text-text-muted mt-1">{project.description}</p>
                         )}
                     </div>
+                    <button
+                        onClick={fetchProject}
+                        disabled={loading}
+                        className="btn-secondary flex items-center gap-2"
+                        title="Sync with GitHub"
+                    >
+                        <Activity className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        Sync Activity
+                    </button>
                 </div>
 
                 {/* Project Info Card */}
@@ -157,18 +173,46 @@ const ProjectDetail = () => {
                                     key={log._id}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="p-4 bg-white/5 rounded-lg border border-white/5"
+                                    className="p-4 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 transition-colors"
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <span className={`px-2 py-1 text-xs rounded-full border ${getActionColor(log.action)}`}>
-                                                {log.action}
-                                            </span>
-                                            <p className="mt-2 text-white">{log.message}</p>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${getActionColor(log.action)}`}>
+                                                    {log.action}
+                                                </span>
+                                                {log.metadata?.author && (
+                                                    <span className="text-xs text-text-muted flex items-center gap-1">
+                                                        <User className="w-3 h-3" />
+                                                        {log.metadata.author}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-white text-sm font-medium leading-relaxed truncate-2-lines">
+                                                {log.message}
+                                            </p>
+                                            {log.metadata?.sha && (
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <code className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-primary/80">
+                                                        {log.metadata.sha.substring(0, 7)}
+                                                    </code>
+                                                    {log.metadata.url && (
+                                                        <a
+                                                            href={log.metadata.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                                                        >
+                                                            View on GitHub
+                                                            <ExternalLink className="w-2.5 h-2.5" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="text-sm text-text-muted">
+                                        <div className="text-xs text-text-muted whitespace-nowrap pt-1">
                                             {formatTime(log.timestamp)}
-                                        </span>
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}

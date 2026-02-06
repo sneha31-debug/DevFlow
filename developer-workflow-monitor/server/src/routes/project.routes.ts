@@ -4,6 +4,7 @@ import Project from '../models/Project.model';
 import Repository from '../models/Repository.model';
 import ActivityLog from '../models/ActivityLog.model';
 import { IUser } from '../models/User.model';
+import { fetchProjectLogs } from '../services/github.service';
 
 const router = Router();
 
@@ -80,14 +81,21 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        // Get logs for this project's repository
-        const logs = await ActivityLog.find({ repository: project.repository })
-            .sort({ timestamp: -1 })
-            .limit(20);
+        // Fetch and sync latest logs from GitHub
+        const logs = await fetchProjectLogs(id, user._id.toString());
 
         res.json({ project, logs });
     } catch (error: any) {
-        res.status(500).json({ message: 'Error fetching project', error: error.message });
+        console.error('Error fetching logs:', error);
+        // If GitHub fetch fails, still return project with existing logs
+        const project = await Project.findOne({ _id: req.params.id, owner: (req.user as IUser)._id })
+            .populate('repository', 'name fullName url language stars forks isPrivate');
+
+        const existingLogs = await ActivityLog.find({ project: req.params.id })
+            .sort({ timestamp: -1 })
+            .limit(50);
+
+        res.json({ project, logs: existingLogs, error: 'Failed to sync latest activity from GitHub' });
     }
 });
 
