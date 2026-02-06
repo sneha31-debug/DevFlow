@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Activity, FileText, Plus, LogOut, User, Github } from 'lucide-react';
+import { LayoutDashboard, Activity, FileText, Plus, LogOut, User, Github, TestTube } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface UserProfile {
@@ -41,6 +41,10 @@ const Sidebar = ({ user, onLogout }: { user: UserProfile | null; onLogout: () =>
                 <Link to="/monitors" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
                     <Activity className="w-5 h-5" />
                     Monitors
+                </Link>
+                <Link to="/tests" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <TestTube className="w-5 h-5" />
+                    API Tests
                 </Link>
             </nav>
 

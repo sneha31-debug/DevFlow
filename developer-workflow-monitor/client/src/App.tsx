@@ -9,6 +9,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Repositories from './pages/Repositories';
 import ActivityLogs from './pages/ActivityLogs';
 import Monitors from './pages/Monitors';
+import ApiTests from './pages/ApiTests';
 
 // Simple Auth Layout Stub
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -62,6 +63,12 @@ function App() {
         <Route path="/monitors" element={
           <PrivateRoute>
             <Monitors />
+          </PrivateRoute>
+        } />
+
+        <Route path="/tests" element={
+          <PrivateRoute>
+            <ApiTests />
           </PrivateRoute>
         } />
 

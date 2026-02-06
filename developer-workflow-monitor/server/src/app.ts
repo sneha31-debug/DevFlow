@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes';
 import githubRoutes from './routes/github.routes';
 import projectRoutes from './routes/project.routes';
 import monitorRoutes from './routes/monitor.routes';
+import apiTestRoutes from './routes/apiTest.routes';
 import { connectDB } from './config/db';
 import { MonitorService } from './services/monitor.service';
 
@@ -45,6 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/monitors', monitorRoutes);
+app.use('/api/tests', apiTestRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

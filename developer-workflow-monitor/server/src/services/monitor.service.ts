@@ -1,5 +1,6 @@
 import Monitor from '../models/Monitor.model';
 import mongoose from 'mongoose';
+import ActivityLog from '../models/ActivityLog.model';
 
 export class MonitorService {
     // Perform a single check for a monitor
@@ -7,6 +8,7 @@ export class MonitorService {
         const monitor = await Monitor.findById(monitorId);
         if (!monitor) return;
 
+        const previousStatus = monitor.status;
         const startTime = Date.now();
         let status: 'up' | 'down' = 'down';
         let responseTime = 0;
@@ -18,6 +20,23 @@ export class MonitorService {
         } catch (error) {
             status = 'down';
             responseTime = 0;
+        }
+
+        // Log status change if it's not pending and status changed
+        if (monitor.status !== 'pending' && previousStatus !== status) {
+            const user = monitor.user || (monitor as any).owner; // Handle potential schema differences
+
+            await ActivityLog.create({
+                user: user,
+                project: monitor.project, // Link to project if exists
+                action: status === 'up' ? 'MONITOR_UP' : 'MONITOR_DOWN',
+                message: `Monitor ${monitor.name} is now ${status.toUpperCase()}`,
+                metadata: {
+                    monitorId: monitor._id,
+                    url: monitor.url,
+                    responseTime
+                }
+            });
         }
 
         // Update monitor

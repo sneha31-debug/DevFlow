@@ -56,6 +56,9 @@ const ActivityLogs = () => {
             COMMIT: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
             PROJECT_CREATED: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
             STAR: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+            MONITOR_UP: 'bg-green-500/20 text-green-400 border-green-500/30',
+            MONITOR_DOWN: 'bg-red-500/20 text-red-400 border-red-500/30',
+            API_TEST_RUN: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
         };
         return colors[action] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
@@ -114,6 +117,9 @@ const ActivityLogs = () => {
                         <option value="COMMIT" className="bg-slate-800">Commits</option>
                         <option value="PROJECT_CREATED" className="bg-slate-800">Projects</option>
                         <option value="LOGIN" className="bg-slate-800">Login</option>
+                        <option value="MONITOR_UP" className="bg-slate-800">Monitor Up</option>
+                        <option value="MONITOR_DOWN" className="bg-slate-800">Monitor Down</option>
+                        <option value="API_TEST_RUN" className="bg-slate-800">API Tests</option>
                     </select>
                 </div>
 
