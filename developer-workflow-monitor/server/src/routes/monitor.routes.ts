@@ -33,7 +33,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
         });
 
         // Trigger immediate check
-        MonitorService.checkMonitor(monitor._id as string);
+        MonitorService.checkMonitor(monitor._id.toString());
 
         res.status(201).json({ monitor });
     } catch (error: any) {
@@ -83,7 +83,7 @@ router.post('/:id/check', authMiddleware, async (req: Request, res: Response) =>
             return res.status(404).json({ message: 'Monitor not found' });
         }
 
-        const result = await MonitorService.checkMonitor(monitor._id as string);
+        const result = await MonitorService.checkMonitor(monitor._id.toString());
         res.json({ message: 'Check triggered', result });
     } catch (error: any) {
         res.status(500).json({ message: 'Error checking monitor', error: error.message });

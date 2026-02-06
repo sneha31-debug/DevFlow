@@ -141,6 +141,12 @@ const Monitors = () => {
                     </button>
                 </div>
 
+                {error && (
+                    <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
+                        {error}
+                    </div>
+                )}
+
                 {adding && (
                     <motion.form
                         initial={{ opacity: 0, y: -20 }}

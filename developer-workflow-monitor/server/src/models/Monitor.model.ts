@@ -35,11 +35,10 @@ const MonitorSchema = new Schema<IMonitor>({
 });
 
 // Limit history to last 50 entries to prevent document bloat
-MonitorSchema.pre('save', function (next) {
+MonitorSchema.pre('save', function () {
     if (this.history.length > 50) {
         this.history = this.history.slice(-50);
     }
-    next();
 });
 
 export default mongoose.model<IMonitor>('Monitor', MonitorSchema);
