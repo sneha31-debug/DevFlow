@@ -43,7 +43,7 @@ export class MonitorService {
         for (const monitor of monitors) {
             // Simple logic: Check if lastChecked + frequency < now
             // For now, we'll just check everything on every run for simplicity in this demo
-            await this.checkMonitor(monitor._id as string);
+            await this.checkMonitor(monitor._id.toString());
             checked++;
         }
         console.log(`Checked ${checked} monitors.`);
