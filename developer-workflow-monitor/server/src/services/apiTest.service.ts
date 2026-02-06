@@ -17,7 +17,7 @@ export class ApiTestService {
         let responseTime = 0;
 
         try {
-            const headers = test.headers ? Object.fromEntries(test.headers) : {};
+            const headers = test.headers ? test.headers : {};
             // Ensure Content-Type is set if body is present
             if (test.body && !headers['Content-Type']) {
                 headers['Content-Type'] = 'application/json';

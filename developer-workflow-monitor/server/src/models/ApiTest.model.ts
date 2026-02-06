@@ -23,7 +23,7 @@ const ApiTestSchema = new Schema<IApiTest>({
     name: { type: String, required: true },
     method: { type: String, enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], required: true },
     url: { type: String, required: true },
-    headers: { type: Map, of: String },
+    headers: { type: Schema.Types.Mixed },
     body: { type: String },
     assertions: [{
         type: { type: String, enum: ['status', 'contains', 'json_path', 'time'], required: true },
