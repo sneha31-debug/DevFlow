@@ -5,7 +5,9 @@ import passport from './config/passport';
 import authRoutes from './routes/auth.routes';
 import githubRoutes from './routes/github.routes';
 import projectRoutes from './routes/project.routes';
+import monitorRoutes from './routes/monitor.routes';
 import { connectDB } from './config/db';
+import { MonitorService } from './services/monitor.service';
 
 const app = express();
 
@@ -15,6 +17,9 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+
+// Start Monitoring Service
+MonitorService.startMonitoringLoop();
 
 // Debugging: Log all requests
 app.use((req, res, next) => {
@@ -39,6 +44,7 @@ app.use(passport.session());
 app.use('/api/auth', authRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/monitors', monitorRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

@@ -38,6 +38,10 @@ const Sidebar = ({ user, onLogout }: { user: UserProfile | null; onLogout: () =>
                     <FileText className="w-5 h-5" />
                     Activity Logs
                 </Link>
+                <Link to="/monitors" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+                    <Activity className="w-5 h-5" />
+                    Monitors
+                </Link>
             </nav>
 
             {/* User Profile Section */}
