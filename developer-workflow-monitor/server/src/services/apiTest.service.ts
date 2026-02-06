@@ -5,29 +5,80 @@ import mongoose from 'mongoose';
 
 export class ApiTestService {
     // Run a single API test
+    // Run a single API test by ID
     static async runTest(testId: string, userId: string) {
         const test = await ApiTest.findById(testId);
         if (!test) throw new Error('Test not found');
 
+        const resultData = await this.performRequest(test.url, test.method, test.headers, test.body);
+
+        // Evaluate Assertions
+        const assertionResults = this.evaluateAssertions(test, resultData.status, resultData.responseTime, resultData.responseBody);
+
+        let success = false;
+        if (test.assertions && test.assertions.length > 0) {
+            success = assertionResults.every(r => r.passed);
+        } else {
+            success = resultData.status >= 200 && resultData.status < 300;
+        }
+
+        // Save Result
+        const result = await ApiTestResult.create({
+            test: test._id,
+            user: userId,
+            project: test.project,
+            status: resultData.status,
+            responseTime: resultData.responseTime,
+            success,
+            responseBody: resultData.responseBody,
+            error: resultData.error,
+            assertionResults,
+            timestamp: new Date()
+        });
+
+        // Log Activity
+        await ActivityLog.create({
+            user: userId,
+            project: test.project,
+            action: 'API_TEST_RUN',
+            message: `API Test "${test.name}" ${success ? 'PASSED' : 'FAILED'} ${resultData.error ? '(Network Error)' : ''}`,
+            metadata: {
+                testId: test._id,
+                resultId: result._id,
+                status: resultData.status,
+                responseTime: resultData.responseTime,
+                error: resultData.error
+            }
+        });
+
+        return result;
+    }
+
+    // Run an ad-hoc test (not saved in DB)
+    static async runAdHocTest(config: { url: string, method: string, headers?: any, body?: any }, userId: string) {
+        return await this.performRequest(config.url, config.method, config.headers, config.body);
+    }
+
+    private static async performRequest(url: string, method: string, headers: any = {}, body: any) {
         const startTime = Date.now();
         let status = 0;
-        let success = false;
+        let responseTime = 0;
         let responseBody: any = null;
         let error: string | undefined = undefined;
-        let responseTime = 0;
 
         try {
-            const headers = test.headers ? test.headers : {};
-            // Ensure Content-Type is set if body is present
-            if (test.body && !headers['Content-Type']) {
+            // Ensure Content-Type if body present
+            if (body && !headers['Content-Type']) {
                 headers['Content-Type'] = 'application/json';
             }
 
-            const response = await fetch(test.url, {
-                method: test.method,
-                headers: headers,
-                body: ['GET', 'HEAD'].includes(test.method) ? undefined : test.body,
-                signal: AbortSignal.timeout(10000) // 10s timeout
+            const bodyToSend = (body && typeof body === 'object') ? JSON.stringify(body) : body;
+
+            const response = await fetch(url, {
+                method,
+                headers,
+                body: ['GET', 'HEAD'].includes(method) ? undefined : bodyToSend,
+                signal: AbortSignal.timeout(10000)
             });
 
             status = response.status;
@@ -40,76 +91,15 @@ export class ApiTestService {
                 responseBody = await response.text();
             }
 
-            // Evaluate Assertions
-            const assertionResults = this.evaluateAssertions(test, status, responseTime, responseBody);
-
-            // Determine overall success (all assertions passed, or if no assertions, status is 2xx)
-            if (test.assertions && test.assertions.length > 0) {
-                success = assertionResults.every(r => r.passed);
-            } else {
-                success = status >= 200 && status < 300;
-            }
-
-            // Save Result
-            const result = await ApiTestResult.create({
-                test: test._id,
-                user: userId,
-                project: test.project,
-                status,
-                responseTime,
-                success,
-                responseBody,
-                assertionResults,
-                timestamp: new Date()
-            });
-
-            // Log Activity linked to Project
-            await ActivityLog.create({
-                user: userId,
-                project: test.project,
-                action: 'API_TEST_RUN',
-                message: `API Test "${test.name}" ${success ? 'PASSED' : 'FAILED'}`,
-                metadata: {
-                    testId: test._id,
-                    resultId: result._id,
-                    status,
-                    responseTime
-                }
-            });
-
-            return result;
+            return { status, responseTime, responseBody, error: undefined };
 
         } catch (err: any) {
-            responseTime = Date.now() - startTime;
-            success = false;
-            error = err.message;
-
-            const result = await ApiTestResult.create({
-                test: test._id,
-                user: userId,
-                project: test.project,
+            return {
                 status: 0,
-                responseTime,
-                success: false,
-                error,
-                assertionResults: [], // No assertions run on network failure
-                timestamp: new Date()
-            });
-
-            // Log Activity for failure as well
-            await ActivityLog.create({
-                user: userId,
-                project: test.project,
-                action: 'API_TEST_RUN',
-                message: `API Test "${test.name}" FAILED (Network Error)`,
-                metadata: {
-                    testId: test._id,
-                    resultId: result._id,
-                    error
-                }
-            });
-
-            return result;
+                responseTime: Date.now() - startTime,
+                responseBody: null,
+                error: err.message
+            };
         }
     }
 

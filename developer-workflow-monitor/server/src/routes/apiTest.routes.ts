@@ -87,7 +87,7 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
     }
 });
 
-// Run a test
+// Run a test by ID
 router.post('/:id/run', authMiddleware, async (req: Request, res: Response) => {
     try {
         const user = req.user as IUser;
@@ -95,6 +95,18 @@ router.post('/:id/run', authMiddleware, async (req: Request, res: Response) => {
         res.json({ result });
     } catch (error: any) {
         res.status(500).json({ message: 'Error running test', error: error.message });
+    }
+});
+
+// Run an ad-hoc test
+router.post('/execute', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const user = req.user as IUser;
+        const { url, method, headers, body } = req.body;
+        const result = await ApiTestService.runAdHocTest({ url, method, headers, body }, user._id.toString());
+        res.json({ result });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Error executing test', error: error.message });
     }
 });
 

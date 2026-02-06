@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
-import { Activity, Plus, Trash2, ArrowLeft, Globe, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { Activity, Plus, Trash2, CheckCircle, AlertCircle, RefreshCw, X, Globe } from 'lucide-react';
 
 const API_URL = 'http://localhost:5001';
 
@@ -95,7 +94,8 @@ const Monitors = () => {
         }
     };
 
-    const checkNow = async (id: string) => {
+    const checkNow = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
         setRefreshing(id);
         try {
             const token = localStorage.getItem('token');
@@ -113,193 +113,202 @@ const Monitors = () => {
     };
 
     return (
-        <div className="min-h-screen p-8 relative">
-            <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-slate-900 to-black -z-10" />
-
-            <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                        <Link to="/" className="text-text-muted hover:text-white transition-colors">
-                            <ArrowLeft className="w-6 h-6" />
-                        </Link>
-                        <div>
-                            <h1 className="text-3xl font-bold flex items-center gap-3">
-                                <Activity className="w-8 h-8" />
-                                Uptime Monitors
-                            </h1>
-                            <p className="text-text-muted mt-1">
-                                Real-time health checks for your deployments
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => setAdding(!adding)}
-                        className="btn-primary flex items-center gap-2"
-                    >
-                        <Plus className="w-5 h-5" />
-                        Add Monitor
-                    </button>
+        <div className="page-container max-w-7xl mx-auto p-8">
+            <header className="flex items-center justify-between mb-10">
+                <div>
+                    <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                        <Activity className="w-8 h-8 text-purple-500" />
+                        Uptime Monitors
+                    </h1>
+                    <p className="text-slate-400">Real-time health checks for your deployments</p>
                 </div>
+                <button
+                    onClick={() => setAdding(!adding)}
+                    className="btn-primary flex items-center gap-2 shadow-lg shadow-purple-900/20"
+                >
+                    <Plus className="w-5 h-5" />
+                    Add Monitor
+                </button>
+            </header>
 
-                {error && (
-                    <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
-                        {error}
-                    </div>
-                )}
-
+            <AnimatePresence>
                 {adding && (
-                    <motion.form
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        onSubmit={handleAddMonitor}
-                        className="glass-panel p-6 rounded-xl mb-8"
+                    <motion.div
+                        initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                        exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                        className="overflow-hidden"
                     >
-                        <h3 className="text-xl font-semibold mb-4">Add New Monitor</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label className="block text-sm font-medium text-text-muted mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={newName}
-                                    onChange={e => setNewName(e.target.value)}
-                                    placeholder="e.g. Production API"
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none focus:border-primary"
-                                />
+                        <form
+                            onSubmit={handleAddMonitor}
+                            className="glass-panel p-6 rounded-xl border border-purple-500/30 bg-purple-900/10"
+                        >
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-lg font-semibold text-white">New Monitor</h3>
+                                <button type="button" onClick={() => setAdding(false)} className="text-slate-400 hover:text-white">
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-text-muted mb-1">URL</label>
-                                <input
-                                    type="url"
-                                    required
-                                    value={newUrl}
-                                    onChange={e => setNewUrl(e.target.value)}
-                                    placeholder="https://api.example.com"
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none focus:border-primary"
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Service Name</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={newName}
+                                        onChange={e => setNewName(e.target.value)}
+                                        placeholder="e.g. Production API"
+                                        className="input-field bg-black/40"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Endpoint URL</label>
+                                    <input
+                                        type="url"
+                                        required
+                                        value={newUrl}
+                                        onChange={e => setNewUrl(e.target.value)}
+                                        placeholder="https://api.example.com/health"
+                                        className="input-field bg-black/40"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setAdding(false)}
-                                className="px-4 py-2 text-text-muted hover:text-white transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button type="submit" className="btn-primary">
-                                Create Monitor
-                            </button>
-                        </div>
-                    </motion.form>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setAdding(false)}
+                                    className="px-4 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary">
+                                    Create Monitor
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
                 )}
+            </AnimatePresence>
 
-                {loading ? (
-                    <div className="text-center py-12 text-text-muted">Loading monitors...</div>
-                ) : monitors.length === 0 ? (
-                    <div className="text-center py-12">
-                        <Activity className="w-16 h-16 mx-auto text-text-muted mb-4" />
-                        <h3 className="text-xl font-medium mb-2">No monitors yet</h3>
-                        <p className="text-text-muted">Add a URL to start tracking uptime</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {monitors.map((monitor) => (
-                            <motion.div
-                                key={monitor._id}
-                                layout
-                                className="glass-panel p-6 rounded-xl"
-                            >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div>
-                                        <div className="flex items-center gap-3">
-                                            {monitor.status === 'up' ? (
-                                                <CheckCircle className="w-5 h-5 text-green-500" />
-                                            ) : monitor.status === 'down' ? (
-                                                <AlertCircle className="w-5 h-5 text-red-500" />
-                                            ) : (
-                                                <div className="w-5 h-5 rounded-full border-2 border-slate-500 border-t-transparent animate-spin" />
-                                            )}
-                                            <h3 className="font-semibold text-lg">{monitor.name}</h3>
+            {error && (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5" />
+                    {error}
+                </div>
+            )}
+
+            {loading ? (
+                <div className="flex justify-center py-20">
+                    <div className="w-10 h-10 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+                </div>
+            ) : monitors.length === 0 ? (
+                <div className="text-center py-20 glass-panel rounded-2xl border-dashed">
+                    <Activity className="w-16 h-16 mx-auto text-slate-600 mb-4" />
+                    <h3 className="text-xl font-medium text-white mb-2">No monitors yet</h3>
+                    <p className="text-slate-400 max-w-sm mx-auto">Add a URL to start tracking uptime and response latency.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {monitors.map((monitor) => (
+                        <motion.div
+                            key={monitor._id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="glass-panel p-6 rounded-xl hover:border-purple-500/30 transition-all group"
+                        >
+                            <div className="flex items-start justify-between mb-6">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <div className={`relative flex items-center justify-center w-6 h-6 rounded-full ${monitor.status === 'up' ? 'bg-emerald-500/10 text-emerald-500' :
+                                            monitor.status === 'down' ? 'bg-red-500/10 text-red-500' : 'bg-slate-500/10 text-slate-500'
+                                            }`}>
+                                            {monitor.status === 'up' ? <CheckCircle className="w-4 h-4" /> :
+                                                monitor.status === 'down' ? <AlertCircle className="w-4 h-4" /> :
+                                                    <div className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" />}
                                         </div>
-                                        <a
-                                            href={monitor.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm text-text-muted hover:text-primary flex items-center gap-1 mt-1"
-                                        >
-                                            <Globe className="w-3 h-3" />
-                                            {monitor.url}
-                                        </a>
+                                        <h3 className="font-bold text-lg text-white tracking-tight">{monitor.name}</h3>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => checkNow(monitor._id)}
-                                            disabled={refreshing === monitor._id}
-                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                                            title="Check Now"
-                                        >
-                                            <RefreshCw className={`w-4 h-4 ${refreshing === monitor._id ? 'animate-spin' : ''}`} />
-                                        </button>
-                                        <button
-                                            onClick={() => deleteMonitor(monitor._id)}
-                                            className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-4 h-4 text-red-400" />
-                                        </button>
+                                    <a
+                                        href={monitor.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs font-mono text-slate-500 hover:text-purple-400 flex items-center gap-1.5 ml-9 transition-colors"
+                                    >
+                                        <Globe className="w-3 h-3" />
+                                        {monitor.url}
+                                    </a>
+                                </div>
+                                <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={(e) => checkNow(monitor._id, e)}
+                                        disabled={refreshing === monitor._id}
+                                        className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                        title="Check Now"
+                                    >
+                                        <RefreshCw className={`w-4 h-4 ${refreshing === monitor._id ? 'animate-spin' : ''}`} />
+                                    </button>
+                                    <button
+                                        onClick={() => deleteMonitor(monitor._id)}
+                                        className="p-2 hover:bg-red-500/20 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                                        title="Delete"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="bg-black/20 p-3 rounded-lg border border-white/5">
+                                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Status</div>
+                                    <div className={`font-bold ${monitor.status === 'up' ? 'text-emerald-400' : 'text-red-400'} uppercase text-sm`}>
+                                        {monitor.status}
                                     </div>
                                 </div>
-
-                                <div className="grid grid-cols-3 gap-4 mb-4">
-                                    <div className="bg-white/5 p-3 rounded-lg text-center">
-                                        <div className="text-xs text-text-muted mb-1">Status</div>
-                                        <div className={`font-semibold ${monitor.status === 'up' ? 'text-green-400' : 'text-red-400'} uppercase`}>
-                                            {monitor.status}
-                                        </div>
-                                    </div>
-                                    <div className="bg-white/5 p-3 rounded-lg text-center">
-                                        <div className="text-xs text-text-muted mb-1">Response Time</div>
-                                        <div className="font-semibold">{monitor.responseTime || '-'}ms</div>
-                                    </div>
-                                    <div className="bg-white/5 p-3 rounded-lg text-center">
-                                        <div className="text-xs text-text-muted mb-1">Last Checked</div>
-                                        <div className="text-sm">
-                                            {monitor.lastChecked ? new Date(monitor.lastChecked).toLocaleTimeString() : '-'}
-                                        </div>
+                                <div className="bg-black/20 p-3 rounded-lg border border-white/5">
+                                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Latency</div>
+                                    <div className="font-bold text-white text-sm">{monitor.responseTime || '-'}ms</div>
+                                </div>
+                                <div className="bg-black/20 p-3 rounded-lg border border-white/5">
+                                    <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-1">Last Checked</div>
+                                    <div className="text-sm text-slate-300 truncate">
+                                        {monitor.lastChecked ? new Date(monitor.lastChecked).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="h-32 mt-4">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <AreaChart data={monitor.history}>
-                                            <defs>
-                                                <linearGradient id={`colorLatency-${monitor._id}`} x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <Tooltip
-                                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-                                                itemStyle={{ color: '#fff' }}
-                                                labelStyle={{ display: 'none' }}
-                                                formatter={(value) => [`${value}ms`, 'Latency']}
-                                            />
-                                            <Area
-                                                type="monotone"
-                                                dataKey="responseTime"
-                                                stroke="#4f46e5"
-                                                fillOpacity={1}
-                                                fill={`url(#colorLatency-${monitor._id})`}
-                                            />
-                                        </AreaChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                            <div className="h-24 w-full opacity-60 hover:opacity-100 transition-opacity">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={monitor.history}>
+                                        <defs>
+                                            <linearGradient id={`colorLatency-${monitor._id}`} x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#0F1117', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}
+                                            itemStyle={{ color: '#fff', fontSize: '12px' }}
+                                            labelStyle={{ display: 'none' }}
+                                            formatter={(value) => [`${value}ms`, 'Latency']}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="responseTime"
+                                            stroke="#8b5cf6"
+                                            strokeWidth={2}
+                                            fillOpacity={1}
+                                            fill={`url(#colorLatency-${monitor._id})`}
+                                            isAnimationActive={false}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

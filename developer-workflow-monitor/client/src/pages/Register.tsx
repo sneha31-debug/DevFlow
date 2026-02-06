@@ -65,123 +65,126 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0F1117]">
             {/* Background Ambience */}
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900 via-slate-900 to-black z-0" />
-            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-pulse" />
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[128px] animate-pulse" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[128px] animate-pulse delay-1000" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="glass-panel p-8 rounded-2xl w-full max-w-md z-10 mx-4"
+                className="relative z-10 w-full max-w-md mx-4"
             >
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                        Create Account
-                    </h1>
-                    <p className="text-text-muted">Join DevFlow to monitor your APIs</p>
+                <div className="glass-card p-8 shadow-2xl shadow-black/50">
+                    <div className="text-center mb-8">
+                        <h1 className="text-3xl font-bold mb-2 text-white tracking-tight">
+                            Create Account
+                        </h1>
+                        <p className="text-slate-400">Join DevFlow to monitor your APIs</p>
+                    </div>
+
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="space-y-6">
+                        <button
+                            onClick={handleGithubRegister}
+                            className="w-full flex items-center justify-center gap-3 bg-[#24292F] hover:bg-[#24292F]/80 text-white p-3.5 rounded-xl transition-all border border-white/10 font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                        >
+                            <Github className="w-5 h-5" />
+                            Sign up with GitHub
+                        </button>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-white/10"></div>
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase tracking-wider">
+                                <span className="px-4 bg-[#14161B] text-slate-500">Or register with email</span>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleRegister} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Username</label>
+                                <div className="relative group">
+                                    <User className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                                    <input
+                                        type="text"
+                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-11 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-medium"
+                                        placeholder="johndoe"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                                <div className="relative group">
+                                    <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                                    <input
+                                        type="email"
+                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-11 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-medium"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                                <div className="relative group">
+                                    <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                                    <input
+                                        type="password"
+                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-11 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-medium"
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+                                <div className="relative group">
+                                    <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" />
+                                    <input
+                                        type="password"
+                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-11 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-medium"
+                                        placeholder="••••••••"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 hover:-translate-y-0.5 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? 'Creating Account...' : 'Create Account'}
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </form>
+                    </div>
+
+                    <p className="mt-8 text-center text-slate-400 text-sm">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+                            Sign in
+                        </Link>
+                    </p>
                 </div>
-
-                {error && (
-                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
-                        {error}
-                    </div>
-                )}
-
-                <div className="mb-6">
-                    <button
-                        onClick={handleGithubRegister}
-                        className="w-full flex items-center justify-center gap-2 bg-[#24292F] hover:bg-[#24292F]/90 text-white p-3 rounded-lg transition-colors border border-gray-700 font-medium"
-                    >
-                        <Github className="w-5 h-5" />
-                        Sign up with GitHub
-                    </button>
-
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-700"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-[#1e293b] text-text-muted">Or register with email</span>
-                        </div>
-                    </div>
-                </div>
-
-                <form onSubmit={handleRegister} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-text-muted mb-2">Username</label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-3 h-5 w-5 text-text-muted" />
-                            <input
-                                type="text"
-                                className="input-field pl-10"
-                                placeholder="johndoe"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-muted mb-2">Email Address</label>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-3 h-5 w-5 text-text-muted" />
-                            <input
-                                type="email"
-                                className="input-field pl-10"
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-muted mb-2">Password</label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-3 h-5 w-5 text-text-muted" />
-                            <input
-                                type="password"
-                                className="input-field pl-10"
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-text-muted mb-2">Confirm Password</label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-3 h-5 w-5 text-text-muted" />
-                            <input
-                                type="password"
-                                className="input-field pl-10"
-                                placeholder="••••••••"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="btn-primary w-full flex items-center justify-center gap-2 group disabled:opacity-50"
-                    >
-                        {loading ? 'Creating Account...' : 'Create Account'}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                </form>
-
-                <p className="mt-6 text-center text-text-muted text-sm">
-                    Already have an account?{' '}
-                    <Link to="/login" className="text-primary hover:text-primary-hover font-medium">
-                        Sign in
-                    </Link>
-                </p>
             </motion.div>
         </div>
     );

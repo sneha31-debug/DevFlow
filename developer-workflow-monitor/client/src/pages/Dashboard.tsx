@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Activity, FileText, Plus, LogOut, User, Github, TestTube } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Activity, Clock, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface UserProfile {
@@ -12,74 +12,10 @@ interface UserProfile {
     authProvider?: string;
 }
 
-const Sidebar = ({ user, onLogout }: { user: UserProfile | null; onLogout: () => void }) => {
-    return (
-        <div className="w-64 glass-panel border-r border-[#ffffff10] h-screen flex flex-col fixed left-0 top-0 z-20">
-            <div className="p-6 border-b border-[#ffffff10]">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    DevMonitor
-                </h1>
-            </div>
-
-            <nav className="flex-1 p-4 space-y-2">
-                <Link to="/" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <LayoutDashboard className="w-5 h-5" />
-                    Dashboard
-                </Link>
-                <Link to="/repositories" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <Github className="w-5 h-5" />
-                    Repositories
-                </Link>
-                <Link to="/projects" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <Activity className="w-5 h-5" />
-                    Projects
-                </Link>
-                <Link to="/logs" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <FileText className="w-5 h-5" />
-                    Activity Logs
-                </Link>
-                <Link to="/monitors" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <Activity className="w-5 h-5" />
-                    Monitors
-                </Link>
-                <Link to="/tests" className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                    <TestTube className="w-5 h-5" />
-                    API Tests
-                </Link>
-            </nav>
-
-            {/* User Profile Section */}
-            <div className="p-4 border-t border-[#ffffff10]">
-                {user && (
-                    <div className="flex items-center gap-3 px-4 py-3 mb-2">
-                        {user.avatarUrl ? (
-                            <img src={user.avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full" />
-                        ) : (
-                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                                <User className="w-4 h-4 text-primary" />
-                            </div>
-                        )}
-                        <div className="overflow-hidden">
-                            <p className="font-medium text-sm truncate">{user.displayName || user.username}</p>
-                            <p className="text-xs text-text-muted truncate">{user.email}</p>
-                        </div>
-                    </div>
-                )}
-                <button onClick={onLogout} className="flex items-center gap-3 px-4 py-3 text-text-muted hover:text-error w-full rounded-lg transition-colors">
-                    <LogOut className="w-5 h-5" />
-                    Sign Out
-                </button>
-            </div>
-        </div>
-    );
-};
-
 const Dashboard = () => {
     const [user, setUser] = useState<UserProfile | null>(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
-        // Load user from localStorage
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             try {
@@ -90,76 +26,117 @@ const Dashboard = () => {
         }
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/login');
+    const containerVariant = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariant = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { y: 0, opacity: 1 }
     };
 
     return (
-        <div className="min-h-screen pl-64">
-            <Sidebar user={user} onLogout={handleLogout} />
+        <div className="page-container max-w-7xl mx-auto p-8">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                <div>
+                    <h1 className="text-3xl font-bold text-white mb-2">
+                        Welcome back{user ? `, ${user.displayName || user.username}` : ''}
+                    </h1>
+                    <p className="text-slate-400">Here's what's happening with your projects today.</p>
+                </div>
+                <Link
+                    to="/projects/new"
+                    className="btn-primary flex items-center gap-2 shadow-lg shadow-purple-900/20"
+                >
+                    <Plus className="w-5 h-5" />
+                    New Project
+                </Link>
+            </header>
 
-            <main className="p-8">
-                <header className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold mb-1">
-                            Welcome{user ? `, ${user.displayName || user.username}` : ''}!
-                        </h1>
-                        <p className="text-text-muted">Overview of your API performance</p>
+            <motion.div
+                variants={containerVariant}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10"
+            >
+                {/* Stats Cards */}
+                <motion.div variants={itemVariant} className="glass-panel p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Activity className="w-24 h-24 text-purple-500" />
                     </div>
-                    <Link to="/projects/new" className="btn-primary flex items-center gap-2">
-                        <Plus className="w-5 h-5" />
-                        New Project
-                    </Link>
-                </header>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {/* Stats Cards */}
-                    <motion.div whileHover={{ y: -5 }} className="glass-panel p-6 rounded-xl">
-                        <h3 className="text-text-muted text-sm font-medium mb-2">Total Monitors</h3>
-                        <p className="text-3xl font-bold">12</p>
-                        <div className="mt-4 text-xs text-success flex items-center gap-1">
-                            <span>●</span> All systems operational
+                    <div className="relative z-10">
+                        <h3 className="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider">Total Monitors</h3>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-4xl font-bold text-white">12</p>
+                            <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                                100% Operational
+                            </span>
                         </div>
-                    </motion.div>
+                    </div>
+                </motion.div>
 
-                    <motion.div whileHover={{ y: -5 }} className="glass-panel p-6 rounded-xl">
-                        <h3 className="text-text-muted text-sm font-medium mb-2">Avg Response Time</h3>
-                        <p className="text-3xl font-bold">45ms</p>
-                        <div className="mt-4 text-xs text-success flex items-center gap-1">
-                            <span>↓</span> 12% vs last week
+                <motion.div variants={itemVariant} className="glass-panel p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Clock className="w-24 h-24 text-blue-500" />
+                    </div>
+                    <div className="relative z-10">
+                        <h3 className="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider">Avg Response</h3>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-4xl font-bold text-white">45<span className="text-lg text-slate-500 ml-1">ms</span></p>
+                            <span className="text-xs font-medium text-emerald-400 flex items-center gap-1">
+                                ↓ 12%
+                            </span>
                         </div>
-                    </motion.div>
+                    </div>
+                </motion.div>
 
-                    <motion.div whileHover={{ y: -5 }} className="glass-panel p-6 rounded-xl">
-                        <h3 className="text-text-muted text-sm font-medium mb-2">Error Rate</h3>
-                        <p className="text-3xl font-bold">0.01%</p>
-                        <div className="mt-4 text-xs text-text-muted">
-                            Last 24 hours
+                <motion.div variants={itemVariant} className="glass-panel p-6 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <AlertCircle className="w-24 h-24 text-red-500" />
+                    </div>
+                    <div className="relative z-10">
+                        <h3 className="text-slate-400 text-sm font-medium mb-2 uppercase tracking-wider">Error Rate</h3>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-4xl font-bold text-white">0.01%</p>
+                            <span className="text-xs text-slate-500">Last 24h</span>
                         </div>
-                    </motion.div>
+                    </div>
+                </motion.div>
+            </motion.div>
+
+            {/* Recent Activity Stub */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="glass-panel rounded-2xl p-8"
+            >
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+                    <Link to="/logs" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">View All</Link>
                 </div>
 
-                {/* Recent Activity Stub */}
-                <div className="glass-panel rounded-xl p-6">
-                    <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-2 h-2 rounded-full ${i === 1 ? 'bg-error' : 'bg-success'}`} />
-                                    <div>
-                                        <p className="font-medium">GET /api/users</p>
-                                        <p className="text-xs text-text-muted">Project: E-commerce Core</p>
-                                    </div>
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl border border-white/5 transition-all group">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-2.5 h-2.5 rounded-full shadow-[0_0_8px] ${i === 1 ? 'bg-red-500 shadow-red-500/50' : 'bg-emerald-500 shadow-emerald-500/50'}`} />
+                                <div>
+                                    <p className="font-medium text-slate-200 group-hover:text-white transition-colors">GET /api/users</p>
+                                    <p className="text-xs text-slate-500">Project: E-commerce Core</p>
                                 </div>
-                                <span className="text-sm text-text-muted">2 mins ago</span>
                             </div>
-                        ))}
-                    </div>
+                            <span className="text-xs font-mono text-slate-500">2 mins ago</span>
+                        </div>
+                    ))}
                 </div>
-            </main>
+            </motion.div>
         </div>
     );
 };

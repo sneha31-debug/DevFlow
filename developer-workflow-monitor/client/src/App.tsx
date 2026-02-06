@@ -10,6 +10,7 @@ import Repositories from './pages/Repositories';
 import ActivityLogs from './pages/ActivityLogs';
 import Monitors from './pages/Monitors';
 import ApiTests from './pages/ApiTests';
+import Layout from './components/Layout';
 
 // Simple Auth Layout Stub
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -24,53 +25,21 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        <Route path="/" element={
+        {/* Protected Routes Wrapped in Layout */}
+        <Route element={
           <PrivateRoute>
-            <Dashboard />
+            <Layout />
           </PrivateRoute>
-        } />
-
-        <Route path="/projects" element={
-          <PrivateRoute>
-            <ProjectList />
-          </PrivateRoute>
-        } />
-
-        <Route path="/projects/new" element={
-          <PrivateRoute>
-            <ProjectForm />
-          </PrivateRoute>
-        } />
-
-        <Route path="/projects/:id" element={
-          <PrivateRoute>
-            <ProjectDetail />
-          </PrivateRoute>
-        } />
-
-        <Route path="/repositories" element={
-          <PrivateRoute>
-            <Repositories />
-          </PrivateRoute>
-        } />
-
-        <Route path="/logs" element={
-          <PrivateRoute>
-            <ActivityLogs />
-          </PrivateRoute>
-        } />
-
-        <Route path="/monitors" element={
-          <PrivateRoute>
-            <Monitors />
-          </PrivateRoute>
-        } />
-
-        <Route path="/tests" element={
-          <PrivateRoute>
-            <ApiTests />
-          </PrivateRoute>
-        } />
+        }>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/projects" element={<ProjectList />} />
+          <Route path="/projects/new" element={<ProjectForm />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route path="/repositories" element={<Repositories />} />
+          <Route path="/logs" element={<ActivityLogs />} />
+          <Route path="/monitors" element={<Monitors />} />
+          <Route path="/tests" element={<ApiTests />} />
+        </Route>
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
