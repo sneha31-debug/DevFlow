@@ -111,10 +111,10 @@ const Login = () => {
                             </motion.div>
                         )}
 
-                        <div className="space-y-8">
+                        <div className="space-y-10">
                             {/* GitHub */}
                             <button onClick={handleGithubLogin} className={`group ${AuthStyles.githubBtn}`}>
-                                <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <Github className="w-6 h-6 group-hover:scale-110 transition-transform" />
                                 Continue with GitHub
                             </button>
 
@@ -127,7 +127,7 @@ const Login = () => {
                             </div>
 
                             {/* Form */}
-                            <form onSubmit={handleLogin} className="space-y-5">
+                            <form onSubmit={handleLogin} className="space-y-8">
                                 <div>
                                     <label className={AuthStyles.label}>EMAIL ADDRESS</label>
                                     <div className={AuthStyles.inputWrapper}>
@@ -159,10 +159,10 @@ const Login = () => {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className={`group mt-2 ${AuthStyles.submitBtn}`}
+                                    className={`group mt-4 ${AuthStyles.submitBtn}`}
                                 >
                                     {loading ? 'Signing in...' : 'Sign In'}
-                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </form>
                         </div>

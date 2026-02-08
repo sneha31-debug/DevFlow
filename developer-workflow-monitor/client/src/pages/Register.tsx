@@ -98,10 +98,10 @@ const Register = () => {
                             </motion.div>
                         )}
 
-                        <div className="space-y-8">
+                        <div className="space-y-10">
                             {/* GitHub */}
                             <button onClick={handleGithubRegister} className={`group ${AuthStyles.githubBtn}`}>
-                                <Github className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <Github className="w-6 h-6 group-hover:scale-110 transition-transform" />
                                 Continue with GitHub
                             </button>
 
@@ -114,7 +114,7 @@ const Register = () => {
                             </div>
 
                             {/* Form */}
-                            <form onSubmit={handleRegister} className="space-y-5">
+                            <form onSubmit={handleRegister} className="space-y-8">
                                 <div>
                                     <label className={AuthStyles.label}>USERNAME</label>
                                     <div className={AuthStyles.inputWrapper}>
