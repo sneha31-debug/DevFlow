@@ -33,12 +33,12 @@ export const AuthStyles = {
     label: "block text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4",
     inputWrapper: "relative group mb-10",
     inputIcon: "absolute left-6 top-1/2 -translate-y-1/2 h-7 w-7 text-zinc-400 group-focus-within:text-white transition-colors z-10",
-    input: "w-full bg-[#09090b] border border-white/10 rounded-2xl py-6 pl-16 pr-6 text-lg text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-sm [&:-webkit-autofill]:shadow-[0_0_0_1000px_#09090b_inset] [&:-webkit-autofill]:-webkit-text-fill-color-white",
+    input: "w-full bg-[#09090b] border border-white/10 rounded-2xl py-6 pl-16 pr-6 text-lg text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all shadow-sm [&:-webkit-autofill]:shadow-[0_0_0_1000px_#09090b_inset] [&:-webkit-autofill]:-webkit-text-fill-color-white",
 
-    // Submit Button: Larger target
-    submitBtn: "w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white py-6 rounded-2xl font-bold text-xl transition-all shadow-lg shadow-indigo-500/20 mt-10 flex items-center justify-center gap-3 hover:-translate-y-0.5",
+    // Submit Button: Larger target - Matches Global Brand Gradient
+    submitBtn: "w-full bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white py-6 rounded-2xl font-bold text-xl transition-all shadow-lg shadow-violet-500/25 mt-10 flex items-center justify-center gap-3 hover:-translate-y-0.5",
 
     // Footer
     footerText: "mt-14 text-center text-base text-zinc-400 font-medium",
-    footerLink: "text-indigo-400 hover:text-indigo-300 font-bold ml-1 transition-colors hover:text-white hover:underline"
+    footerLink: "text-violet-400 hover:text-violet-300 font-bold ml-1 transition-colors hover:text-white hover:underline"
 };

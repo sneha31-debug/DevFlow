@@ -29,14 +29,13 @@ interface ActivityLog {
     _id: string;
     action: string;
     message: string;
-    metadata?: {
-        sha?: string;
-        author?: string;
-        url?: string;
-        eventId?: string;
-        type?: string;
-    };
     timestamp: string;
+    metadata?: {
+        author?: string;
+        sha?: string;
+        url?: string;
+        [key: string]: any;
+    };
 }
 
 const ProjectDetail = () => {
@@ -120,15 +119,6 @@ const ProjectDetail = () => {
                             <p className="text-text-muted mt-1">{project.description}</p>
                         )}
                     </div>
-                    <button
-                        onClick={fetchProject}
-                        disabled={loading}
-                        className="btn-secondary flex items-center gap-2"
-                        title="Sync with GitHub"
-                    >
-                        <Activity className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        Sync Activity
-                    </button>
                 </div>
 
                 {/* Project Info Card */}

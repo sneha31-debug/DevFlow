@@ -23,7 +23,7 @@ export class MonitorService {
         }
 
         // Log status change if it's not pending and status changed
-        if (monitor.status !== 'pending' && previousStatus !== status) {
+        if (previousStatus !== status) {
             const user = monitor.user || (monitor as any).owner; // Handle potential schema differences
 
             await ActivityLog.create({
